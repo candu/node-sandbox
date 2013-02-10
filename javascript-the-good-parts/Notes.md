@@ -84,6 +84,19 @@ Any "constructor" arguments would be passed in step 3. Note that I'm
 assuming the existence of `bind`, which is usually (IIRC) a thin wrapper
 around `Function.prototype.apply`.
 
+Actually, the book does provide an implementation:
+
+    Function.method('new', function() {
+      var that = Object.create(this.prototype);   // 1., 2.
+      var other = this.apply(that, arguments);    // 3. (without bind)
+
+      // Some constructors will mutate this but forget to return it...
+      return (typeof other === 'object' && other) || that;
+    });
+
+Note the similarities: `Object.create()` is shorthand for the first two steps,
+and `apply()` provides a terse implementation of `bind()`.
+
 # globals
 
 The recommended namespacing approach is to use a single global variable, then
@@ -118,6 +131,40 @@ be useful to do this:
 as opposed to having to declare, e.g., `temp1`, ..., `tempN` for this
 purpose.
 
+## object specifiers
+
+This is a standard "trick" for dealing with functions that have many
+parameters. Instead of specifying parameters in linear fashion:
+
+    function maker(f, l, m, c, s) {}
+
+An object is provided instead:
+
+    Object.merge = function(o1, o2) {
+      for (var key in o2) {
+        if (o2.hasOwnProperty(key)) {
+          o1[key] = o2[key];
+        }
+      }
+      return o1;
+    };
+    function maker(opts) {
+      Object.merge(opts, {
+        f: 'foo',
+        l: 42,
+        m: null,
+        c: /\w+/,
+        s: Infinity
+      });
+    }
+
+This creates a cleaner signature and makes it much easier to specify
+defaults. However, this can make code less readable, as you have to scan
+the function body to determine what parameters it has.
+
+This seems like a tradeoff that should only be made for functions with many
+optional parameters.
+
 # exceptions
 
 Not sure why he throws an object: you can use the built-in `Error` and
@@ -144,3 +191,10 @@ Closures can help maintain encapsulation:
 Here `_value` is effectively private; the member closures `incr`, `get`
 can access it, but external code cannot. Also, `_value` can use `init`, so
 we can also use this as a constructor-with-arguments pattern.
+
+# functional inheritance
+
+This is considered the best pattern for object-oriented programming in
+JavaScript. It provides *encapsulation*, in that variables and methods can
+be kept private within a class scope. (Note that we're using JavaScript's
+function scoping together with closures to enforce privacy!)
