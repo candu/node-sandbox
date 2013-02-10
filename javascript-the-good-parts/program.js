@@ -106,3 +106,31 @@ var coolcat = function(spec) {
 
 var myCoolCat = coolcat({name: 'Bix'});
 console.log(myCoolCat.getName());
+
+Array.method('reduce', function(f, value) {
+  for (var i = 0; i < this.length; i++) {
+    value = f(this[i], value);
+  }
+  return value;
+});
+
+var data = [4, 8, 15, 16, 23, 42];
+var add = function(a, b) { return a + b; };
+var mult = function(a, b) { return a * b; };
+console.log(data.reduce(add, 0));
+console.log(data.reduce(mult, 1));
+data.total = function() {
+  return this.reduce(add, 0);
+};
+console.log(data.total());
+
+var parse_url = /^(?:([A-Za-z]+):)?(\/{0,3})([0-9.\-A-Za-z]+)(?::(\d+))?(?:\/([^?#]*))?(?:\?([^#]*))?(?:#(.*))?$/;
+var url = "http://www.ora.com:80/goodparts?q#fragment";
+var result = parse_url.exec(url);
+var names = ['url', 'scheme', 'slash', 'host', 'port', 'path', 'query', 'hash'];
+var blanks = '       ';
+for (var i = 0; i < names.length; i++) {
+  document.writeln(
+    names[i] + ':' + blanks.substring(names[i].length), result[i]
+  );
+}
