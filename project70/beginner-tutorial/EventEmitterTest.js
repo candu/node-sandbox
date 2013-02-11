@@ -5,6 +5,7 @@ var MyEmitter = function(times) {
   var _interval = null,
       _done = 0,
       that = Object.create(EventEmitter.prototype);
+  EventEmitter.call(that);
   var _tick = function() {
     _done++;
     that.emit('tick', _done);
