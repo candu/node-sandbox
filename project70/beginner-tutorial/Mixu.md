@@ -34,3 +34,22 @@ Many browser JavaScript libraries have some variant of event listening:
 Every DOM node can emit events, and you can bind callbacks as event listeners
 on specific DOM nodes. In node.js, there are no DOM nodes; we need something
 else to emit events! Enter `EventEmitter`.
+
+In node.js, `EventEmitter` is essentially a glorified multimap between
+event names and listeners. Notably, `EventEmitter` *does not guarantee
+asynchronous execution!* When an Event is fired, something like this will
+happen:
+
+    for (var listener in this._events[eventName]) {
+      listener.apply(null, args);
+    }
+
+It is up to each `listener` to provide an asynchronous implementation so that
+this won't block the event loop.
+
+## Streams
+
+Methods like `readFileSync()`, `readFile()` are memory hogs: like Python's
+`file.read()`, they read *everything* into memory in one large chunk.
+`readSync()`, `read()` do streaming I/O, exposing data a bit at a time.
+There are streaming methods for file, HTTP, TCP socket, and inter-process I/O.
