@@ -1,0 +1,11 @@
+extends layout
+
+block content
+  h1= title
+  #articles
+    - each article in articles
+      .article
+        .created_at= article.created_at
+        .title
+          a(href="/view/" + article._id.toHexString())!= article.title
+        .body= article.body
