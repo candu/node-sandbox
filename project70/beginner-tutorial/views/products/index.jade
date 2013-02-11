@@ -6,3 +6,6 @@ block content
     each product in products
       .product
         include product
+        p
+          a(href='/products/' + product.id) Details
+

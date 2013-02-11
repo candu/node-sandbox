@@ -2,6 +2,10 @@ extends ../layout
 
 block content
   h1 Product:
-    #products
-      .product
-        include product
+  #products
+    .product
+      include product
+      p
+        a(href='/products') Back
+      p
+        a(href='/products/' + product.id + '/edit') Edit
