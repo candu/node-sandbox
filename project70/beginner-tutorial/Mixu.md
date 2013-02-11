@@ -98,3 +98,28 @@ HTTPS requires a certificate and private key; once those are generated, we
 can test `request`, `connection`, and `checkContinue` in exactly the same way
 as for the HTTP server. (`curl` will require the `-k` flag to bypass its
 version of the browser's untrusted certificate warning.)
+
+# Chapter 11 - File system
+
+The `fs` module provides utilities for file I/O. Actually, this module does
+far more than that - you can access node-ified versions of most of the
+standard UNIX filesystem-related system calls.
+
+If you're looking for equivalents to Python's `os.path` utilities, check out
+the [path module](http://nodejs.org/api/path.html). `os.path.join()`, for
+instance, has counterpart `path.join()`:
+
+    var filePath = require('path').join('foo', 'bar');
+
+Again, you have `readFile()` for fully buffered reads and `read()` for
+streaming reads, with `writeFile()` and `write()` for writes.
+
+The main difficulty is in getting asynchronous I/O to do what you want.
+There are considerations that don't exist in blocking code:
+
+- Order of execution is not guaranteed. If you are performing dependent
+  operations (e.g. create and write to a file only if it doesn't exist), you
+  must ensure that the operations occur in order by using control flow
+  techniques.
+- Throttling must be performed explicitly: nothing will stop your I/O code
+  from opening thousands of file descriptors in parallel.
