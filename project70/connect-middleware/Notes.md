@@ -21,4 +21,5 @@ In practice, this looks like
     }
 
 Here, `next` is managed by `connect` in a way that reminds me of the series
-control flow pattern.
+control flow pattern. You can see a working middleware implementation in this
+directory.
