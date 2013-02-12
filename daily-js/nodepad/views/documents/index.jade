@@ -4,6 +4,9 @@ block content
   h1 Your Documents
   p
     a(class='button', href='/documents/new') + New Document
+    form(method='post', action='/sessions')
+      input(name='_method', value='DELETE', type='hidden')
+      input(type='submit', value='Log out')
   ul
     - each d in documents
       include viewOne
