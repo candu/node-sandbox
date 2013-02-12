@@ -1,4 +1,5 @@
 var express = require('express'),
+    stylus = require('stylus'),
     http = require('http'),
     path = require('path'),
     mongoose = require('mongoose'),
@@ -6,11 +7,19 @@ var express = require('express'),
 
 var app = express();
 
+var compileMethod = function(str) {
+  return stylus(str).set('compress', true);
+};
+
 app.configure(function() {
+  app.use(stylus.middleware({
+    src: path.join(__dirname, 'public'),
+    compress: true
+  }));
   app.set('db', 'nodepad');
   app.use(express.logger());
   app.set('port', process.env.PORT || 3000);
-  app.set('views', __dirname + '/views');
+  app.set('views', path.join(__dirname, 'views'));
   app.set('view engine', 'jade');
   app.use(express.favicon());
   app.use(express.logger('dev'));
@@ -47,22 +56,49 @@ app.get('/documents.:format?', function(req, res) {
         }));
         break;
       default:
-        res.render('documents/index');
+        res.render('documents/index', {documents: documents});
     }
   });
 });
 
 app.post('/documents.:format?', function(req, res) {
-  var documentData = JSON.parse(req.body.document),
-      document = new Document(documentData);
-  document.save(function() {
+  var data = JSON.parse(req.body.document),
+      d = new Document(data);
+  d.save(function() {
     switch (req.params.format) {
       case 'json':
-        res.send(document);
+        res.send(d);
         break;
       default:
         res.redirect('/documents');
     }
+  });
+});
+
+app.get('/documents/:id.:format?/edit', function(req, res) {
+  Document.findById(req.params.id, function(err, d) {
+    // TODO: error handling
+    res.render('documents/edit', {d: d});
+  });
+});
+
+app.get('/documents/new', function(req, res) {
+  res.render('documents/new', {d: new Document() });
+});
+
+app.put('/documents/:id.:format?', function(req, res) {
+  Document.findById(req.body.document.id, function(err, d) {
+    d.title = req.body.document.title;
+    d.data = req.body.document.data;
+    d.save(function() {
+      switch (req.params.format) {
+        case 'json':
+          res.send(d);
+          break;
+        default:
+          res.redirect('/documents');
+      }
+    });
   });
 });
 
