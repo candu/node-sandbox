@@ -1,9 +1,10 @@
-var mongoose = require('mongoose').Mongoose,
-    db = mongoose.connect('mongodb://localhost/nodepad');
+var mongoose = require('mongoose');
 
-mongoose.model('Document', {
-  properties: ['title', 'data', 'tags'],
-  indexes: ['title']
+var DocumentSchema = mongoose.Schema({
+  title: String,
+  data: String,
+  tags: [String]
 });
-
-exports.Document = db.model('Document');
+DocumentSchema.index({title: 1});
+var Document = mongoose.model('Document', DocumentSchema);
+exports.Document = Document;
