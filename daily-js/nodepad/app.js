@@ -3,6 +3,7 @@ var express = require('express'),
     http = require('http'),
     path = require('path'),
     mongoose = require('mongoose'),
+    _ = require('../../lib/underscore'),
     Document = require('models').Document;
 
 var app = express();
@@ -62,8 +63,11 @@ app.get('/documents.:format?', function(req, res) {
 });
 
 app.post('/documents.:format?', function(req, res) {
-  var data = JSON.parse(req.body.document),
-      d = new Document(data);
+  var data = req.body.document;
+  if (_.isString(data)) {
+    data = JSON.parse(data);
+  }
+  var d = new Document(data);
   d.save(function() {
     switch (req.params.format) {
       case 'json':
@@ -86,6 +90,18 @@ app.get('/documents/new', function(req, res) {
   res.render('documents/new', {d: new Document() });
 });
 
+app.get('/documents/:id.:format?', function(req, res) {
+  Document.findById(req.params.id, function(err, d) {
+    switch (req.params.format) {
+      case 'json':
+        res.send(d);
+        break;
+      default:
+        res.render('documents/view', {d: d});
+    }
+  });
+});
+
 app.put('/documents/:id.:format?', function(req, res) {
   Document.findById(req.body.document.id, function(err, d) {
     d.title = req.body.document.title;
@@ -101,12 +117,6 @@ app.put('/documents/:id.:format?', function(req, res) {
     });
   });
 });
-
-app._listen = app.listen;
-app.listen = function() {
-  console.log(arguments);
-  app._listen.apply(app, arguments);
-};
 
 module.exports = app;
 

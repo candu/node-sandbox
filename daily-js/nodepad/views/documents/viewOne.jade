@@ -1,0 +1,6 @@
+li
+  a(class='button', href='/documents') Index 
+  a(class='button', href='/documents/' + d.id + '/edit') Edit
+  a(class='button destroy', href='/documents/' + d.id) Delete
+  a.title(href='/documents/' + d.id)
+    =d.title

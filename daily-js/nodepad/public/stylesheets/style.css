@@ -7,3 +7,5 @@ a.button:hover{background-color:#efefef}
 h2 a.button{margin-left:10px}
 form div{padding:0 0 20px 0}
 textarea{width:400px;height:400px;clear:both}
+a.title{font-size:20px}
+div.data{padding-top:10px}
