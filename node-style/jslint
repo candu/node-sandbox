@@ -1,0 +1,113 @@
+#!/usr/bin/env node
+
+var jslint = require('./jslint.js'),
+    fs = require('fs'),
+    async = require('async'),
+    util = require('util');
+
+var fnames = process.argv.slice(2),
+    LIMIT = 16,
+    UTF_8 = 'utf-8',
+    JSLINTRC = '~/.jslintrc',
+    SUCCESS = 0,
+    LINT_FAILED = 1,
+    STAT_FAILED = 2,
+    READ_FAILED = 3;
+
+var lintOptions = {
+  anon: true,
+  browser: false,
+  'continue': true,
+  debug: true,
+  devel: true,
+  dontstop: true,
+  indent: 2,
+  maxlen: 80,
+  node: true,
+  plusplus: true,
+  todo: true
+};
+
+function readFile(filename, callback) {
+  fs.readFile(filename, UTF_8, callback);
+}
+
+// We don't want *all* errors: Crockford has a thing against multiple
+// var declarations in a function, which I don't agree with.
+function validError(error) {
+  if (error === null || error === undefined) {
+    return false;
+  }
+  switch (error.reason) {
+    case "Combine this with the previous 'var' statement.":
+    case "Move 'var' declarations to the top of the function.":
+      return false;
+  }
+  return true;
+}
+
+try {
+  var lintOptionsJSON = fs.readFileSync(JSLINTRC, UTF_8);
+  lintOptionOverrides = JSON.parse(lintOptionsJSON);
+  for (var option in lintOptionOverrides) {
+    if (lintOptionOverrides.hasOwnProperty(option)) {
+      lintOptions[option] = lintOptionOverrides[option];
+    }
+  }
+} catch (err) {
+  var msg = util.format('no %s for lint options, using defaults', JSLINTRC);
+  console.log(msg);
+}
+
+async.mapLimit(fnames, LIMIT, fs.stat, function(err, results) {
+  if (err) {
+    var msg = util.format('could not stat all files: %s', err);
+    console.error(msg);
+    process.exit(STAT_FAILED);
+  }
+  for (var i = 0; i < results.length; i++) {
+    if (!results[i].isFile()) {
+      var msg = util.format('path is not file: %s', fnames[i]);
+      console.error(msg);
+      process.exit(READ_FAILED);
+    }
+  }
+  async.mapLimit(fnames, LIMIT, readFile, function(err, results) {
+    if (err) {
+      var msg = util.format('could not read all files: %s', err);
+      console.error(msg);
+      process.exit(READ_FAILED);
+    }
+    var totalFileErrors = 0,
+        totalErrors = 0;
+    for (var i = 0; i < results.length; i++) {
+      if (jslint(results[i], lintOptions)) {
+        continue;
+      }
+      var errors = jslint.errors.filter(validError);
+      totalFileErrors++;
+      totalErrors += errors.length;
+      var msg = util.format('%s: %d errors', fnames[i], errors.length);
+      console.error(msg);
+      for (var j = 0; j < errors.length; j++) {
+        var error = errors[j];
+        var msg = util.format(
+          '%d:%d %s\n%s\n',
+          error.line,
+          error.character,
+          error.reason,
+          error.evidence || ''
+        );
+        console.error(msg);
+      }
+    }
+    if (totalFileErrors > 0) {
+      console.error('jslint: FAILED');
+      console.error(totalErrors + ' errors in ' + totalFileErrors + ' files');
+      process.exit(LINT_FAILED);
+    } else {
+      console.log('jslint: PASSED');
+      process.exit(SUCCESS);
+    }
+  });
+});
