@@ -1,0 +1,12 @@
+{
+  "name": "node-sandbox-fibers",
+  "description": "Playing around with node-fibers and related concurrency patterns.",
+  "version": "0.0.1",
+  "private": true,
+  "dependencies": {
+    "fibers": "1.0.0",
+    "mocha": "1.8.1",
+    "should": "1.2.1",
+    "underscore": "1.4.4"
+  }
+}
