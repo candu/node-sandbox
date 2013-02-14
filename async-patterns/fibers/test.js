@@ -9,18 +9,18 @@ var wait = function(future) {
   return future.wait();
 };
 
-var waitv = function(/* future1, ..., futureN */) {
-  return waita(Array.prototype.slice.call(arguments));
+var waitV = function(/* future1, ..., futureN */) {
+  return waitA(Array.prototype.slice.call(arguments));
 };
 
-var waita = function(futures) {
+var waitA = function(futures) {
   Future.wait(futures);
   return futures.map(function(future) {
     return future.get();
   });
 };
 
-var waito = function(futuresObj) {
+var waitO = function(futuresObj) {
   var keys = [],
       futures = [];
   for (var key in futuresObj) {
@@ -63,7 +63,7 @@ describe('wait', function() {
   });
   it('works in variadic mode', function(done) {
     var f = function() {
-      return waitv(sleep(30, 1), sleep(20, 2), sleep(10, 3));
+      return waitV(sleep(30, 1), sleep(20, 2), sleep(10, 3));
     };
     var ff = f.future();
     ff().resolve(function(err, result) {
@@ -81,7 +81,7 @@ describe('wait', function() {
   });
   it('works in array mode', function(done) {
     var f = function() {
-      return waita([sleep(30, 1), sleep(20, 2), sleep(10, 3)]);
+      return waitA([sleep(30, 1), sleep(20, 2), sleep(10, 3)]);
     };
     var ff = f.future();
     ff().resolve(function(err, result) {
@@ -99,7 +99,7 @@ describe('wait', function() {
   });
   it('works in object mode', function(done) {
     var f = function() {
-      return waito({
+      return waitO({
         a: sleep(30, 1),
         b: sleep(20, 2),
         c: sleep(10, 3)
