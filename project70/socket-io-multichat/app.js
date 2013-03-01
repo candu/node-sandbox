@@ -4,33 +4,45 @@ var express = require('express'),
     url = require('url'),
     _ = require('../../lib/underscore');
 
-var app = express();
-
-app.get('/', function(req, res) {
-  res.sendfile('client.html');
-});
-
-app.get('/addText', function(req, res) {
-  var query = req.query;
+function ChatRoomManager() {
+  this._rooms = {};
+}
+ChatRoomManager.prototype.openRoom = function(name) {
+  if (_.has(this._rooms, name)) {
+    return;
+  }
+  this._rooms[name] = io.of('/' + name + '/listen')
+    .on('connection', function(socket) {
+      socket.on('set name', function(data) {
+        socket.set('user', data.user, function() {
+          socket.emit('begin chat');
+        });
+      });
+    });
+};
+ChatRoomManager.prototype.sendMessage = function(name, query) {
   console.log(query.user + ': ' + query.text);
-  listen.emit('add text', {
+  this._rooms[name].emit('add text', {
     user: query.user,
     text: query.text
   });
+};
+
+var app = express(),
+    chat = new ChatRoomManager();
+
+app.get('/:room', function(req, res) {
+  chat.openRoom(req.params.room);
+  res.sendfile('client.html');
+});
+
+app.get('/:room/addText', function(req, res) {
+  chat.sendMessage(req.params.room, req.query);
   res.type('text').send('OK');
 });
 
 var server = http.createServer(app),
     io = require('socket.io').listen(server);
-
-var listen = io.of('/listen')
-  .on('connection', function(socket) {
-    socket.on('set name', function(data) {
-      socket.set('user', data.user, function() {
-        socket.emit('begin chat');
-      });
-    });
-  });
 
 server.listen(3000, function() {
   console.log(JSON.stringify(server.address()));

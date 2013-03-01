@@ -90,7 +90,7 @@
         userName = $(userNameField).val();
 
         // Send listen to pick up messages
-        var socket = io.connect('/listen');
+        var socket = io.connect(location.pathname + '/listen');
         socket.emit('set name', {user: userName});
         socket.on('begin chat', setupChat);
         socket.on('add text', addText);
@@ -103,7 +103,7 @@
           // When new text is added, handle it by sending the message to the server
           // and then clearing out the text just enetered
           $.ajax({
-            url: '/addText',
+            url: location.pathname + '/addText',
             method: 'GET',
             data: {'user':userName, 'text':$('#newUserText').val()}
           });
