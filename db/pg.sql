@@ -1,0 +1,5 @@
+CREATE TABLE foo (
+  n INTEGER,
+  x REAL,
+  s VARCHAR(255) 
+);
