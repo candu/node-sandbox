@@ -9,7 +9,7 @@ var ArgumentParser = require('argparse').ArgumentParser,
     util = require('util');
 
 var app = express();
-app.set('view engine', 'ejs');
+app.set('view engine', 'jade');
 app.use(express.logger());
 app.use(express.cookieParser());
 app.use(express.bodyParser());

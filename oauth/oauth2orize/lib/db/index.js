@@ -1,5 +1,5 @@
-exports.users = require('./users');
-exports.clients = require('./clients');
-exports.accessTokens = require('./accesstokens');
-exports.authorizationCodes = require('./authorizationcodes');
+exports.users = require('lib/db/users');
+exports.clients = require('lib/db/clients');
+exports.accessTokens = require('lib/db/accesstokens');
+exports.authorizationCodes = require('lib/db/authorizationcodes');
 
