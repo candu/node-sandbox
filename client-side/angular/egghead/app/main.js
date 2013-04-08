@@ -3,9 +3,9 @@ myApp.factory('Data', function() {
   return {message: "I'm data from a service."};
 });
 
-myApp.filter('reverse', function(Data) {
+myApp.filter('reverse', function() {
   return function(text) {
-    return text.split("").reverse().join("") + Data.message;
+    return text.split('').reverse().join('');
   };
 });
 

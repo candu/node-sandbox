@@ -1,12 +1,11 @@
-describe('Unit: Testing Filters', function() {
-  beforeEach(angular.mock.module('myApp'));
+describe('filter', function() {
+  beforeEach(module('myApp'));
 
-  it('should have a reverse filter', inject(function($filter) {
-    expect($filter('reverse')).not.to.equal(null);
-  }));
-
-  it('should have a reverse filter that works', inject(function($filter) {
-    var reverse = $filter('reverse');
-    expect(reverse('foo')).to.equal('oofI\'m data from a service.');
-  }));
+  describe('reverse', function() {
+    it('should reverse a string', inject(function(reverseFilter) {
+      expect(reverseFilter('ABCD')).to.equal('DCBA');
+      expect(reverseFilter('foo')).to.equal('oof');
+      expect(reverseFilter('')).to.equal('');
+    }));
+  });
 });
