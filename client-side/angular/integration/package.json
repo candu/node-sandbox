@@ -1,0 +1,10 @@
+{
+  "name": "angular-integration",
+  "description": "Integrating angular.js, require.js, node.js, and all such happiness.",
+  "version": "0.0.1",
+  "private": true,
+  "dependencies": {
+    "chai": "1.5.0",
+    "requirejs": "2.1.5"
+  }
+}
