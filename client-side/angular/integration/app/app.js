@@ -1,9 +1,11 @@
 define([
   'express',
   'path',
-  'module'
-], function(express, path, module) {
+  'module',
+  'api/index'
+], function(express, path, module, api) {
   var __dirname = path.dirname(module.uri);
+
   var app = express();
   app.use('/lib', express.static(path.join(__dirname, 'lib')));
   app.use('/static', express.static(path.join(__dirname, 'static')));
@@ -12,5 +14,6 @@ define([
   app.get('/', function(req, res) {
     res.render('index');
   });
+  app.get('/api/foos', api.Foo.getAll);
   return app;
 });
