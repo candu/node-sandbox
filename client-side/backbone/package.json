@@ -6,6 +6,8 @@
   "dependencies": {
     "chai": "1.5.0",
     "requirejs": "2.1.5",
+    "mocha": "1.8.1",
+    "mocha-phantomjs": "2.0.0",
     "underscore": "1.4.4"
   }
 }
