@@ -5,8 +5,4 @@ block append head
 
 block content
   #mocha
-  script(src='/lib/test/mocha.js')
-  script(src='/lib/test/chai.js')
-  script(src='/lib/test/config.js')
-  script(src='/lib/test/ui/ui.js')
-  script(src='/lib/test/harness.js')
+  script(data-main='/lib/test/main', src='/lib/third-party/require.js')
