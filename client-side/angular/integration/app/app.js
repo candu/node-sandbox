@@ -15,5 +15,7 @@ define([
     res.render('index');
   });
   app.get('/api/foos', api.Foo.getAll);
+  app.get('/api/foos/:id', api.Foo.get);
+  app.post('/api/foos/:id', api.Foo.post);
   return app;
 });
