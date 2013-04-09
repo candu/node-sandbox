@@ -1,7 +1,9 @@
 doctype 5
 html
   head
-    title BackboneJS Integration
-    link(rel='stylesheet', href='/static/css/bootstrap.css')
+    block head
+      title BackboneJS Integration
+      link(rel='stylesheet', href='/static/css/bootstrap.css')
   body
+    block content
     script(data-main='/lib/main', src='/lib/third-party/require.js')

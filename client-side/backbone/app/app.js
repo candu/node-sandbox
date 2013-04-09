@@ -14,6 +14,9 @@ define([
   app.get('/', function(req, res) {
     res.render('index');
   });
+  app.get('/test', function(req, res) {
+    res.render('test');
+  });
   app.get('/api/foos', api.Foo.getAll);
   app.get('/api/foos/:id', api.Foo.get);
   app.post('/api/foos/:id', api.Foo.post);

@@ -1,0 +1,12 @@
+extends index
+
+block append head
+  link(rel='stylesheet', href='/static/css/test/mocha.css')
+
+block content
+  #mocha
+  script(src='/lib/test/mocha.js')
+  script(src='/lib/test/chai.js')
+  script(src='/lib/test/config.js')
+  script(src='/lib/test/ui/ui.js')
+  script(src='/lib/test/harness.js')
