@@ -8,7 +8,7 @@ requirejs([
   'argparse',
   'http',
   'util',
-  'static/js/server/app'
+  'app'
 ], function(argparse, http, util, app) {
   function parseArgs() {
     var parser = new argparse.ArgumentParser({addHelp: true});

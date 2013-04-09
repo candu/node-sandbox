@@ -1,8 +1,8 @@
 requirejs.config({
-  baseUrl: '/static/js',
+  baseUrl: '/lib',
   paths: {
-    jquery: '/static/js/jquery',
-    bootstrap: '/static/js/bootstrap'
+    jquery: '/lib/third-party/jquery',
+    bootstrap: '/lib/third-party/bootstrap'
   },
   shim: {
     bootstrap: {deps: ['jquery']}
