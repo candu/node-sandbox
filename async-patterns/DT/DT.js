@@ -95,11 +95,13 @@ function Result(value) {
 
 function wait(gen) {
   var parent = Fiber.current;
-  Dispatcher.enqueue(gen, parent);
+  Dispatcher.wait(gen, parent);
 }
 
 function waitv(/* gen1, ..., genN */) {
-  var gens = Array.prototype.slice.call(arguments);
+  var parent = Fiber.current,
+      gens = Array.prototype.slice.call(arguments);
+  Dispatcher.waitv(gens, parent);
 }
 
 function result(value) {
@@ -109,48 +111,108 @@ function result(value) {
 var App = Fiber(function App() {
   var user = Fiber.yield(wait(DT('Obj').gen(1)));
   console.log('user: ', user);
-  //var users = Fiber.yield(wait(DT('Obj').gen([1, 2])));
-  //console.log(users);
+  /*
+  var users = Fiber.yield(waitv(
+    DT('Obj').gen(1),
+    DT('Obj').gen(2)
+  ));
+  console.log(users);
+  */
   Fiber.yield(result(user));
 });
 
 var Dispatcher = {
-  _yielding: []
+  _gens: [],
+  _waits: {},
+  _results: {}
 };
 Dispatcher.dispatch = function() {
   DT.dispatch();
 };
-Dispatcher.enqueue = function(gen, parent) {
-  this._yielding.push({
-    gen: gen,
-    parent: parent
+Dispatcher._genId = function(gen) {
+  if (!_.contains(this._gens, gen)) {
+    this._gens.push(gen);
+  }
+  return _.indexOf(this._gens, gen);
+};
+Dispatcher._gen = function(genId) {
+  return this._gens[genId];
+};
+Dispatcher._canProceed = function(genId) {
+  var waitIds = this._waits[genId];
+  if (!waitIds) {
+    return true;
+  }
+  if (!(waitIds instanceof Array)) {
+    waitIds = [waitIds];
+  }
+  return _.every(waitIds, function hasResult(waitId) {
+    return _.has(this._results, waitId);
+  }.bind(this));
+};
+Dispatcher._getSendValue = function(genId) {
+  var waitIds = this._waits[genId];
+  if (!(waitIds instanceof Array)) {
+    return this._results[waitIds];
+  }
+  return _.map(waitIds, function fetchResult(waitId) {
+    return this._results[waitId];
+  });
+};
+Dispatcher.wait = function(gen, parent) {
+  var genId = this._genId(gen),
+      parentId = this._genId(parent);
+  this._waits[parentId] = genId;
+  var yielded = gen.run();
+  if (yielded instanceof Result) {
+    this._results[genId] = yielded.value;
+  }
+};
+Dispatcher.waitv = function(gens, parent) {
+  var genIds = _.map(gens, this._genId.bind(this)),
+      parentId = this._genId(parent);
+  this._waits[parentId] = genIds;
+  _.each(gens, function(gen, i) {
+    var genId = genIds[i],
+        yielded = gen.run();
+    if (yielded instanceof Result) {
+      this._results[genId] = yielded.value;
+    }
   });
 };
 Dispatcher.run = function(root) {
-  this.enqueue(root, null);
-  while (!_.isEmpty(this._yielding)) {
-    var currentPass = _.clone(this._yielding),
-        blockedGens = _.uniq(_.pluck(currentPass, 'parent'));
-    console.log(currentPass);
-    this._yielding = [];
-    // run all things that aren't blocked one step
-    _.each(currentPass, function(entry) {
-      if (_.contains(blockedGens, entry.gen)) {
-        return;
+  this.wait(root, null);
+  while (!_.isEmpty(this._waits)) {
+    // first, determine which generators to run
+    var toRun = {};
+    _.each(this._waits, function(genIds, parentId) {
+      if (!(genIds instanceof Array)) {
+        genIds = [genIds];
       }
-      var yielded = entry.gen.run();
+      _.each(genIds, function(genId) {
+        if (this._canProceed(genId)) {
+          toRun[genId] = this._getSendValue(genId);
+        }
+      }.bind(this));
+    }.bind(this));
+    // next, run each of those generators one step
+    _.each(toRun, function(sent, genId) {
+      var gen = this._gen(genId),
+          yielded = gen.run(sent);
       if (yielded instanceof Result) {
         console.log('result: ', yielded);
-        if (entry.parent) {
-          entry.parent.run(yielded.value);
-        }
-      } else {
-        this.enqueue(entry.gen, entry.parent);
+        this._results[genId] = yielded.value;
+        delete this._waits[genId];
       }
     }.bind(this));
+    // finally, dispatch to backend data fetchers
     this.dispatch();
   }
 };
+
+// TODO: when do you delete entries in this._waits?
+//
+// a generator has finished running when it results a result. that is it.
 
 Fiber(function main() {
   Dispatcher.run(App);
