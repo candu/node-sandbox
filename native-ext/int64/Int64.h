@@ -19,9 +19,9 @@ class Int64 : public ObjectWrap {
 
   static Handle<Value> New(const Arguments& args);
   static Handle<Value> ToString(const Arguments& args);
-  /*
   static Handle<Value> High32(const Arguments& args);
   static Handle<Value> Low32(const Arguments& args);
+  /*
   static Handle<Value> ShiftLeft(const Arguments& args);
   static Handle<Value> ShiftRight(const Arguments& args);
   static Handle<Value> And(const Arguments& args);
@@ -29,7 +29,7 @@ class Int64 : public ObjectWrap {
   static Handle<Value> Xor(const Arguments& args);
   */
 
-  int64_t mValue;
+  uint64_t mValue;
 };
 
 #endif

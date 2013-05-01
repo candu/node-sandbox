@@ -6,3 +6,5 @@ var x1 = new Int64(),
 console.log(x1.toString());
 console.log(x2.toString());
 console.log(x3.toString());
+console.log(x3.high32().toString(16));
+console.log(x3.low32().toString(16));
