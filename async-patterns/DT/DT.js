@@ -94,10 +94,6 @@ AbstractDataType.prototype.gen = function(ids) {
   }.bind(this));
   return fiber;
 };
-AbstractDataType.prototype.cache = function(id, value) {
-  var key = this.cacheKey(id);
-  this._cache[key] = value;
-};
 AbstractDataType.prototype.dirty = function(id) {
   var key = this.cacheKey(id);
   delete this._cache[key];
