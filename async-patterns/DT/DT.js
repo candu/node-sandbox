@@ -3,6 +3,7 @@ var Fiber = require('fibers'),
     util = require('util');
 
 var DB = {
+  _nextId: 3,
   1: {name: 'foo'},
   2: {name: 'bar'}
 };
@@ -11,9 +12,25 @@ function query(ids) {
   console.log('query:', ids);
   var result = {};
   _.each(ids, function fetchById(id) {
-    result[id] = DB[id] || null;
+    result[id] = null;
+    if (_.has(DB, id)) {
+      result[id] = _.clone(DB[id]);
+    }
   });
   return result;
+}
+
+function insert(name) {
+  var id = DB._nextId++;
+  DB[id] = {name: name};
+  return id;
+}
+
+function update(id, name) {
+  if (!_.has(DB, id)) {
+    throw new Error('missing id: ' + id);
+  }
+  DB[id].name = name;
 }
 
 var DT = (function() {
@@ -77,6 +94,14 @@ AbstractDataType.prototype.gen = function(ids) {
   }.bind(this));
   return fiber;
 };
+AbstractDataType.prototype.cache = function(id, value) {
+  var key = this.cacheKey(id);
+  this._cache[key] = value;
+};
+AbstractDataType.prototype.dirty = function(id) {
+  var key = this.cacheKey(id);
+  delete this._cache[key];
+};
 
 var ObjDataType = new AbstractDataType();
 ObjDataType.cacheKey = function(id) {
@@ -86,6 +111,22 @@ ObjDataType.fetch = function(ids) {
   return query(ids);
 };
 DT.register('Obj', ObjDataType);
+
+var ObjMutator = {};
+ObjMutator.create = function(name) {
+  var fiber = Fiber(function() {
+    Fiber.yield(result(insert(name)));
+  });
+  return fiber;
+};
+ObjMutator.setName = function(id, name) {
+  var fiber = Fiber(function() {
+    update(id, name);
+    DT('Obj').dirty(id);
+    Fiber.yield(result(null));
+  });
+  return fiber;
+};
 
 function Result(value) {
   this.value = value;
@@ -120,10 +161,16 @@ var App = Fiber(function App() {
     DT('Obj').gen(2)
   ));
   console.log('users: ', users);
-  Fiber.yield(result({
-    user: user,
-    users: users
-  }));
+  Fiber.yield(wait(ObjMutator.setName(1, 'baz')));
+  users = Fiber.yield(waitv(
+    DT('Obj').gen(1),
+    DT('Obj').gen(2)
+  ));
+  console.log('users: ', users);
+  var userId = Fiber.yield(wait(ObjMutator.create('frob')));
+  user = Fiber.yield(wait(DT('Obj').gen(userId)));
+  console.log('user: ', user);
+  Fiber.yield(result('w00t'));
 });
 
 var NodeType = {
@@ -173,10 +220,14 @@ function CallGraph() {
   this._hasResult = false;
 }
 CallGraph.prototype.id = function(gen) {
-  if (!_.contains(this._gens, gen)) {
-    this._gens.push(gen);
+  var genId = _.indexOf(this._gens, gen);
+  if (genId !== -1) {
+    return genId;
   }
-  return _.indexOf(this._gens, gen);
+  genId = this._gens.length;
+  this._gens.push(gen);
+  this.setNode(gen, null);
+  return genId;
 };
 CallGraph.prototype.gen = function(genId) {
   return this._gens[genId];
