@@ -8,6 +8,7 @@ var DB = {
 };
 
 function query(ids) {
+  console.log('query:', ids);
   var result = {};
   _.each(ids, function fetchById(id) {
     result[id] = DB[id] || null;
@@ -41,13 +42,16 @@ function AbstractDataType() {
   this._idsToFetch = {};
 }
 AbstractDataType.prototype.dispatch = function() {
-  var ids = _.keys(this._idsToFetch);
+  var ids = _.filter(_.keys(this._idsToFetch), function(id) {
+    var key = this.cacheKey(id);
+    return !_.has(this._cache, key);
+  }.bind(this));
+  this._idsToFetch = {};
   if (_.isEmpty(ids)) {
     return;
   }
   console.log('AbstractDataType dispatch: ', ids);
   var values = this.fetch(ids);
-  this._idsToFetch = {};
   _.each(ids, function(id) {
     var key = this.cacheKey(id);
     this._cache[key] = values[id];
@@ -73,11 +77,6 @@ AbstractDataType.prototype.gen = function(ids) {
   }.bind(this));
   return fiber;
 };
-/*
-AbstractDataType.prototype.dirty = function(key) {
-  delete this._cache[key];
-};
-*/
 
 var ObjDataType = new AbstractDataType();
 ObjDataType.cacheKey = function(id) {
@@ -121,7 +120,10 @@ var App = Fiber(function App() {
     DT('Obj').gen(2)
   ));
   console.log('users: ', users);
-  Fiber.yield(result(user));
+  Fiber.yield(result({
+    user: user,
+    users: users
+  }));
 });
 
 var NodeType = {
@@ -242,15 +244,22 @@ var Dispatcher = {
 Dispatcher.dispatch = function() {
   DT.dispatch();
 };
+Dispatcher.runOneStep = function(gen, sendValue) {
+  var yielded = gen.run(sendValue);
+  if (yielded instanceof Result) {
+    console.log('result: ', yielded);
+    this._graph.setResult(gen, yielded.value);
+  }
+};
 Dispatcher.wait = function(gen, waitGens) {
   this._graph.setNode(gen, waitGens);
   if (waitGens === null) {
   } else if (!(waitGens instanceof Array)) {
-    waitGens.run();
+    this.runOneStep(waitGens);
   } else {
     _.each(waitGens, function(waitGen) {
-      waitGen.run();
-    });
+      this.runOneStep(waitGen);
+    }.bind(this));
   }
 };
 Dispatcher.run = function(root) {
@@ -268,11 +277,7 @@ Dispatcher.run = function(root) {
       if (gen === Fiber.current) {
         this._graph.setResult(gen, sendValue);
       } else {
-        var yielded = gen.run(sendValue);
-        if (yielded instanceof Result) {
-          console.log('result: ', yielded);
-          this._graph.setResult(gen, yielded.value);
-        }
+        this.runOneStep(gen, sendValue);
       }
     }.bind(this));
   }
