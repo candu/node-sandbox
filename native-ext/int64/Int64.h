@@ -25,8 +25,8 @@ class Int64 : public ObjectWrap {
   static Handle<Value> Low32(const Arguments& args);
   static Handle<Value> ShiftLeft(const Arguments& args);
   static Handle<Value> ShiftRight(const Arguments& args);
-  /*
   static Handle<Value> And(const Arguments& args);
+  /*
   static Handle<Value> Or(const Arguments& args);
   static Handle<Value> Xor(const Arguments& args);
   */

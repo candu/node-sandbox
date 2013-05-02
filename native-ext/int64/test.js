@@ -14,3 +14,8 @@ var y1 = new Int64(7),
     y3 = y1.shiftRight(1);
 console.log(y2.toString());
 console.log(y3.toString());
+
+var z1 = new Int64(5),
+    z2 = new Int64(6),
+    z3 = z1.and(z2);
+console.log(z3.toString());
