@@ -14,15 +14,17 @@ class Int64 : public ObjectWrap {
  private:
   Int64();
   Int64(const Local<Number>& n);
+  Int64(const Local<Number>& hi, const Local<Number>& lo);
   Int64(const Local<String>& s);
   ~Int64();
 
+  static Persistent<Function> constructor;
   static Handle<Value> New(const Arguments& args);
   static Handle<Value> ToString(const Arguments& args);
   static Handle<Value> High32(const Arguments& args);
   static Handle<Value> Low32(const Arguments& args);
-  /*
   static Handle<Value> ShiftLeft(const Arguments& args);
+  /*
   static Handle<Value> ShiftRight(const Arguments& args);
   static Handle<Value> And(const Arguments& args);
   static Handle<Value> Or(const Arguments& args);
