@@ -32,6 +32,10 @@ void Int64::Init(Handle<Object> exports) {
     String::NewSymbol("shiftLeft"),
     FunctionTemplate::New(ShiftLeft)->GetFunction()
   );
+  tpl->PrototypeTemplate()->Set(
+    String::NewSymbol("shiftRight"),
+    FunctionTemplate::New(ShiftRight)->GetFunction()
+  );
   constructor = Persistent<Function>::New(tpl->GetFunction());
   exports->Set(String::NewSymbol("Int64"), constructor);
 }
@@ -149,11 +153,23 @@ Handle<Value> Int64::ShiftLeft(const Arguments& args) {
   return scope.Close(instance);
 }
 
-/*
 Handle<Value> Int64::ShiftRight(const Arguments& args) {
   HandleScope scope;
+  if (args.Length() < 1) {
+    ThrowException(Exception::TypeError(String::New("Argument required")));
+    return scope.Close(Undefined());
+  }
+  if (!args[0]->IsNumber()) {
+    ThrowException(Exception::TypeError(String::New("Integer expected")));
+    return scope.Close(Undefined());
+  }
   Int64* obj = ObjectWrap::Unwrap<Int64>(args.This());
-  uint32_t lowBits = static_cast<uint32_t>(obj->mValue & 0xffffffffull);
-  return scope.Close(Int32::NewFromUnsigned(lowBits));
+  uint64_t shiftBy = static_cast<uint64_t>(args[0]->ToNumber()->NumberValue());
+  uint64_t value = obj->mValue >> shiftBy;
+  Local<Value> argv[2] = {
+    Int32::NewFromUnsigned(static_cast<uint32_t>(value >> 32)),
+    Int32::NewFromUnsigned(static_cast<uint32_t>(value & 0xffffffffull))
+  };
+  Local<Object> instance = constructor->NewInstance(2, argv);
+  return scope.Close(instance);
 }
-*/

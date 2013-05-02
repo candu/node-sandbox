@@ -9,6 +9,8 @@ console.log(x3.toString());
 console.log(x3.high32().toString(16));
 console.log(x3.low32().toString(16));
 
-var y1 = new Int64(3),
-    y2 = y1.shiftLeft(1);
+var y1 = new Int64(7),
+    y2 = y1.shiftLeft(1),
+    y3 = y1.shiftRight(1);
 console.log(y2.toString());
+console.log(y3.toString());
