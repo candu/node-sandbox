@@ -15,7 +15,11 @@ var y1 = new Int64(7),
 console.log(y2.toString());
 console.log(y3.toString());
 
-var z1 = new Int64(5),
-    z2 = new Int64(6),
-    z3 = z1.and(z2);
+var z1 = new Int64(13),
+    z2 = new Int64(7),
+    z3 = z1.and(z2),
+    z4 = z1.or(z2),
+    z5 = z1.xor(z2);
 console.log(z3.toString());
+console.log(z4.toString());
+console.log(z5.toString());

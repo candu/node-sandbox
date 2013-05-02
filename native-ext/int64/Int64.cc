@@ -40,6 +40,14 @@ void Int64::Init(Handle<Object> exports) {
     String::NewSymbol("and"),
     FunctionTemplate::New(And)->GetFunction()
   );
+  tpl->PrototypeTemplate()->Set(
+    String::NewSymbol("or"),
+    FunctionTemplate::New(Or)->GetFunction()
+  );
+  tpl->PrototypeTemplate()->Set(
+    String::NewSymbol("xor"),
+    FunctionTemplate::New(Xor)->GetFunction()
+  );
   constructor = Persistent<Function>::New(tpl->GetFunction());
   exports->Set(String::NewSymbol("Int64"), constructor);
 }
@@ -191,6 +199,48 @@ Handle<Value> Int64::And(const Arguments& args) {
   Int64* obj = ObjectWrap::Unwrap<Int64>(args.This());
   Int64* otherObj = ObjectWrap::Unwrap<Int64>(args[0]->ToObject());
   uint64_t value = obj->mValue & otherObj->mValue;
+  Local<Value> argv[2] = {
+    Int32::NewFromUnsigned(static_cast<uint32_t>(value >> 32)),
+    Int32::NewFromUnsigned(static_cast<uint32_t>(value & 0xffffffffull))
+  };
+  Local<Object> instance = constructor->NewInstance(2, argv);
+  return scope.Close(instance);
+}
+
+Handle<Value> Int64::Or(const Arguments& args) {
+  HandleScope scope;
+  if (args.Length() < 1) {
+    ThrowException(Exception::TypeError(String::New("Argument required")));
+    return scope.Close(Undefined());
+  }
+  if (!args[0]->IsObject()) {
+    ThrowException(Exception::TypeError(String::New("Object expected")));
+    return scope.Close(Undefined());
+  }
+  Int64* obj = ObjectWrap::Unwrap<Int64>(args.This());
+  Int64* otherObj = ObjectWrap::Unwrap<Int64>(args[0]->ToObject());
+  uint64_t value = obj->mValue | otherObj->mValue;
+  Local<Value> argv[2] = {
+    Int32::NewFromUnsigned(static_cast<uint32_t>(value >> 32)),
+    Int32::NewFromUnsigned(static_cast<uint32_t>(value & 0xffffffffull))
+  };
+  Local<Object> instance = constructor->NewInstance(2, argv);
+  return scope.Close(instance);
+}
+
+Handle<Value> Int64::Xor(const Arguments& args) {
+  HandleScope scope;
+  if (args.Length() < 1) {
+    ThrowException(Exception::TypeError(String::New("Argument required")));
+    return scope.Close(Undefined());
+  }
+  if (!args[0]->IsObject()) {
+    ThrowException(Exception::TypeError(String::New("Object expected")));
+    return scope.Close(Undefined());
+  }
+  Int64* obj = ObjectWrap::Unwrap<Int64>(args.This());
+  Int64* otherObj = ObjectWrap::Unwrap<Int64>(args[0]->ToObject());
+  uint64_t value = obj->mValue ^ otherObj->mValue;
   Local<Value> argv[2] = {
     Int32::NewFromUnsigned(static_cast<uint32_t>(value >> 32)),
     Int32::NewFromUnsigned(static_cast<uint32_t>(value & 0xffffffffull))
