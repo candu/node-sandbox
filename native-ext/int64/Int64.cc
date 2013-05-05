@@ -21,6 +21,14 @@ void Int64::Init(Handle<Object> exports) {
     FunctionTemplate::New(ToString)->GetFunction()
   );
   tpl->PrototypeTemplate()->Set(
+    String::NewSymbol("equals"),
+    FunctionTemplate::New(Equals)->GetFunction()
+  );
+  tpl->PrototypeTemplate()->Set(
+    String::NewSymbol("compare"),
+    FunctionTemplate::New(Compare)->GetFunction()
+  );
+  tpl->PrototypeTemplate()->Set(
     String::NewSymbol("high32"),
     FunctionTemplate::New(High32)->GetFunction()
   );
@@ -128,6 +136,43 @@ Handle<Value> Int64::ToString(const Arguments& args) {
     value >>= 4;
   }
   return scope.Close(String::New(buf));
+}
+
+Handle<Value> Int64::Equals(const Arguments& args) {
+  HandleScope scope;
+  if (args.Length() < 1) {
+    ThrowException(Exception::TypeError(String::New("Argument required")));
+    return scope.Close(Undefined());
+  }
+  if (!args[0]->IsObject()) {
+    ThrowException(Exception::TypeError(String::New("Object expected")));
+    return scope.Close(Undefined());
+  }
+  Int64* obj = ObjectWrap::Unwrap<Int64>(args.This());
+  Int64* otherObj = ObjectWrap::Unwrap<Int64>(args[0]->ToObject());
+  bool isEqual = obj->mValue == otherObj->mValue;
+  return scope.Close(Boolean::New(isEqual));
+}
+
+Handle<Value> Int64::Compare(const Arguments& args) {
+  HandleScope scope;
+  if (args.Length() < 1) {
+    ThrowException(Exception::TypeError(String::New("Argument required")));
+    return scope.Close(Undefined());
+  }
+  if (!args[0]->IsObject()) {
+    ThrowException(Exception::TypeError(String::New("Object expected")));
+    return scope.Close(Undefined());
+  }
+  Int64* obj = ObjectWrap::Unwrap<Int64>(args.This());
+  Int64* otherObj = ObjectWrap::Unwrap<Int64>(args[0]->ToObject());
+  int32_t cmp = 0;
+  if (obj->mValue < otherObj->mValue) {
+    cmp = -1;
+  } else if (obj->mValue > otherObj->mValue) {
+    cmp = 1;
+  }
+  return scope.Close(Int32::New(cmp));
 }
 
 Handle<Value> Int64::High32(const Arguments& args) {

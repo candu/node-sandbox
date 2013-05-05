@@ -23,3 +23,19 @@ var z1 = new Int64(13),
 console.log(z3.toString());
 console.log(z4.toString());
 console.log(z5.toString());
+
+(function() {
+  var x = new Int64('ffffffffffffffff');
+  console.log(x.high32().toString(16));
+  console.log(x.low32().toString(16));
+})();
+
+(function() {
+  var a = new Int64(2),
+      b = new Int64(3);
+  console.log(a.equals(b));
+  console.log(a.equals(a));
+  console.log(a.compare(b));
+  console.log(b.compare(a));
+  console.log(a.compare(a));
+})();
