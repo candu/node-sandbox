@@ -2,7 +2,10 @@
   "targets": [
     {
       "target_name": "Int64",
-      "sources": ["main.cc", "Int64.cc"]
+      "sources": [
+        "src/main.cc",
+        "src/Int64.cc"
+      ]
     }
   ]
 }

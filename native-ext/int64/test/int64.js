@@ -1,4 +1,4 @@
-var Int64 = require('build/Release/Int64').Int64;
+var Int64 = require('int64-native');
 
 var x1 = new Int64(),
     x2 = new Int64(42),
