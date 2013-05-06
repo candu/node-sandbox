@@ -5,9 +5,12 @@
 #include <node.h>
 #include <v8.h>
 
+#include <limits>
+
 #include "Int64.h"
 
 using namespace node;
+using namespace std;
 using namespace v8;
 
 Persistent<Function> Int64::constructor;
@@ -16,6 +19,14 @@ void Int64::Init(Handle<Object> exports) {
   Local<FunctionTemplate> tpl = FunctionTemplate::New(New);
   tpl->SetClassName(String::NewSymbol("Int64"));
   tpl->InstanceTemplate()->SetInternalFieldCount(1);
+  tpl->PrototypeTemplate()->Set(
+    String::NewSymbol("toNumber"),
+    FunctionTemplate::New(ToNumber)->GetFunction()
+  );
+  tpl->PrototypeTemplate()->Set(
+    String::NewSymbol("valueOf"),
+    FunctionTemplate::New(ValueOf)->GetFunction()
+  );
   tpl->PrototypeTemplate()->Set(
     String::NewSymbol("toString"),
     FunctionTemplate::New(ToString)->GetFunction()
@@ -118,6 +129,20 @@ Handle<Value> Int64::New(const Arguments& args) {
   }
   obj->Wrap(args.This());
   return args.This();
+}
+
+Handle<Value> Int64::ToNumber(const Arguments& args) {
+  HandleScope scope;
+  Int64* obj = ObjectWrap::Unwrap<Int64>(args.This());
+  if (obj->mValue >= 1ull << 53) {
+    return scope.Close(Number::New(numeric_limits<double>::infinity()));
+  }
+  double value = static_cast<double>(obj->mValue);
+  return scope.Close(Number::New(value));
+}
+
+Handle<Value> Int64::ValueOf(const Arguments& args) {
+  return ToNumber(args);
 }
 
 Handle<Value> Int64::ToString(const Arguments& args) {

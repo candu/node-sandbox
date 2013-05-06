@@ -20,6 +20,8 @@ class Int64 : public ObjectWrap {
 
   static Persistent<Function> constructor;
   static Handle<Value> New(const Arguments& args);
+  static Handle<Value> ToNumber(const Arguments& args);
+  static Handle<Value> ValueOf(const Arguments& args);
   static Handle<Value> ToString(const Arguments& args);
   static Handle<Value> Equals(const Arguments& args);
   static Handle<Value> Compare(const Arguments& args);

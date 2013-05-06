@@ -39,3 +39,14 @@ console.log(z5.toString());
   console.log(b.compare(a));
   console.log(a.compare(a));
 })();
+
+(function() {
+  var a = new Int64(2),
+      b = new Int64(3);
+  console.log(a + b);
+})();
+
+(function() {
+  var a = new Int64('0100000000000000');
+  console.log(+a);
+})();
