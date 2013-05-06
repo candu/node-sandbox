@@ -19,6 +19,11 @@ use of 64-bit unsigned integers from node.
 
 ## Usage
 
+All of the following examples are borrowed from `test/int64.js`, which you
+can run via
+
+    npm test
+
 ### Including
 
 `require()` gives you direct access to the constructor:
@@ -29,10 +34,14 @@ use of 64-bit unsigned integers from node.
 
 You can create an `Int64` as follows:
 
-    var x = new Int64(),                        // 0x0
-        y = new Int64(42),                      // 0x2a
-        z = new Int64(0xfedcba98, 0x76543210),  // 0xfedcba9876543210
-        w = new Int64('fedcba9876543210');      // 0xfedcba9876543210
+    var x = new Int64(),
+        y = new Int64(42),
+        z = new Int64(0xfedcba98, 0x76543210),
+        w = new Int64('fedcba9876543210')
+    expect(x.toString()).to.equal('0000000000000000');
+    expect(y.toString()).to.equal('000000000000002a');
+    expect(z.toString()).to.equal('fedcba9876543210');
+    expect(w.toString()).to.equal('fedcba9876543210');
 
 The last two methods allow you to represent `uint64_t` values larger than
 `(1 << 53) - 1`.
@@ -43,7 +52,15 @@ The last two methods allow you to represent `uint64_t` values larger than
 
     var a = new Int64(2),
         b = new Int64(3);
-    console.log(a + b);                         // 4
+    expect(a + b).to.equal(5);
+    var x = new Int64(),
+        y = new Int64(42),
+        z = new Int64(0xfedcba98, 0x76543210),
+        w = new Int64('fedcba9876543210')
+    expect(+x).to.equal(0);
+    expect(+y).to.equal(42);
+    expect(+z).to.equal(Infinity);
+    expect(+w).to.equal(Infinity);
 
 Values larger than `(1 << 53) - 1` will be converted to `Infinity`, since
 they cannot be accurately represented using JavaScript's `Number` type.
@@ -60,22 +77,27 @@ For cases where you wish to sort or compare `Int64` values, `equals()` and
 
     var a = new Int64(2),
         b = new Int64(3);
-    console.log(a.equals(a));                   // true
-    console.log(a.equals(b));                   // false
-    console.log(a.compare(a));                  // 0
-    console.log(a.compare(b));                  // -1
-    console.log(b.compare(a));                  // 1
+    expect(a.equals(a)).to.be.true;
+    expect(a.equals(b)).to.be.false;
+    expect(a.compare(a)).to.equal(0);
+    expect(a.compare(b)).to.equal(-1);
+    expect(b.compare(a)).to.equal(1);
 
-### Bit-Twiddling
+### Bit Manipulation
 
 There are several operations for bit-level manipulation of `Int64` values:
 
     var x = new Int64('fedcba9876543210');
-    console.log(x.high32().toString(16));       // 'fedcba98'
-    console.log(x.low32().toString(16));        // '76543210'
-    var y = x.and(0xffff),
-        z = x.or(0xffff),
+    expect(x.high32().toString(16)).to.equal('fedcba98');
+    expect(x.low32().toString(16)).to.equal('76543210');
+    var y = x.and(new Int64(0xffff)),
+        z = x.or(new Int64(0xffff)),
         w = x.xor(new Int64('fffffffffffffffff'));
-    console.log(y.toString());                  // '0000000000003210'
-    console.log(z.toString());                  // 'fedcba987654ffff'
-    console.log(w.toString());                  // '0123456789abcdef'
+    expect(y.toString()).to.equal('0000000000003210');
+    expect(z.toString()).to.equal('fedcba987654ffff');
+    expect(w.toString()).to.equal('0123456789abcdef');
+    var a = new Int64(7),
+        b = a.shiftLeft(1),
+        c = a.shiftRight(1);
+    expect(b.toString()).to.equal('000000000000000e');
+    expect(c.toString()).to.equal('0000000000000003');

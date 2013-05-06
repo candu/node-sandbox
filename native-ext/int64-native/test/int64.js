@@ -1,52 +1,57 @@
-var Int64 = require('int64-native');
+var Int64 = require('int64-native'),
+    chai = require('/Users/candu/git/travel-site/web/node_modules/chai'),
+    expect = chai.expect;
 
-var x1 = new Int64(),
-    x2 = new Int64(42),
-    x3 = new Int64('1234567890abcdef');
-console.log(x1.toString());
-console.log(x2.toString());
-console.log(x3.toString());
-console.log(x3.high32().toString(16));
-console.log(x3.low32().toString(16));
+describe('Int64', function testInt64() {
+  it('can be constructed', function testConstructor() {
+    var x = new Int64(),
+        y = new Int64(42),
+        z = new Int64(0xfedcba98, 0x76543210),
+        w = new Int64('fedcba9876543210')
+    expect(x.toString()).to.equal('0000000000000000');
+    expect(y.toString()).to.equal('000000000000002a');
+    expect(z.toString()).to.equal('fedcba9876543210');
+    expect(w.toString()).to.equal('fedcba9876543210');
+  });
 
-var y1 = new Int64(7),
-    y2 = y1.shiftLeft(1),
-    y3 = y1.shiftRight(1);
-console.log(y2.toString());
-console.log(y3.toString());
+  it('can be converted to Number', function testNumberConversion() {
+    var a = new Int64(2),
+        b = new Int64(3);
+    expect(a + b).to.equal(5);
+    var x = new Int64(),
+        y = new Int64(42),
+        z = new Int64(0xfedcba98, 0x76543210),
+        w = new Int64('fedcba9876543210')
+    expect(+x).to.equal(0);
+    expect(+y).to.equal(42);
+    expect(+z).to.equal(Infinity);
+    expect(+w).to.equal(Infinity);
+  });
 
-var z1 = new Int64(13),
-    z2 = new Int64(7),
-    z3 = z1.and(z2),
-    z4 = z1.or(z2),
-    z5 = z1.xor(z2);
-console.log(z3.toString());
-console.log(z4.toString());
-console.log(z5.toString());
+  it('can be compared', function testComparison() {
+    var a = new Int64(2),
+        b = new Int64(3);
+    expect(a.equals(a)).to.be.true;
+    expect(a.equals(b)).to.be.false;
+    expect(a.compare(a)).to.equal(0);
+    expect(a.compare(b)).to.equal(-1);
+    expect(b.compare(a)).to.equal(1);
+  });
 
-(function() {
-  var x = new Int64('ffffffffffffffff');
-  console.log(x.high32().toString(16));
-  console.log(x.low32().toString(16));
-})();
-
-(function() {
-  var a = new Int64(2),
-      b = new Int64(3);
-  console.log(a.equals(b));
-  console.log(a.equals(a));
-  console.log(a.compare(b));
-  console.log(b.compare(a));
-  console.log(a.compare(a));
-})();
-
-(function() {
-  var a = new Int64(2),
-      b = new Int64(3);
-  console.log(a + b);
-})();
-
-(function() {
-  var a = new Int64('0100000000000000');
-  console.log(+a);
-})();
+  it('can be bit-manipulated', function testBitManipulation() {
+    var x = new Int64('fedcba9876543210');
+    expect(x.high32().toString(16)).to.equal('fedcba98');
+    expect(x.low32().toString(16)).to.equal('76543210');
+    var y = x.and(new Int64(0xffff)),
+        z = x.or(new Int64(0xffff)),
+        w = x.xor(new Int64('fffffffffffffffff'));
+    expect(y.toString()).to.equal('0000000000003210');
+    expect(z.toString()).to.equal('fedcba987654ffff');
+    expect(w.toString()).to.equal('0123456789abcdef');
+    var a = new Int64(7),
+        b = a.shiftLeft(1),
+        c = a.shiftRight(1);
+    expect(b.toString()).to.equal('000000000000000e');
+    expect(c.toString()).to.equal('0000000000000003');
+  });
+});
