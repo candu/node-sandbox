@@ -3,6 +3,17 @@
 `int64-native` is a simple `uint64_t` wrapper for JavaScript, enabling the
 use of 64-bit unsigned integers from node.
 
+## Why?
+
+`int64-native` was originally developed to support reasonable handling of 
+64-bit ID columns in databases. There are other 64-bit integer modules out
+there, but AFAICT all of them are pure JavaScript; native `uint64_t` seemed
+like a better way to handle this!
+
+The one caveat is that you won't be able to use this browser-side. However,
+you can use the string representation to pass 64-bit values from server to
+client.
+
 ## Installing
 
 ### via npm
@@ -65,10 +76,8 @@ The last two methods allow you to represent `uint64_t` values larger than
 Values larger than `(1 << 53) - 1` will be converted to `Infinity`, since
 they cannot be accurately represented using JavaScript's `Number` type.
 
-`toString()` produces the hex string corresponding to an `Int64`:
-
-    var x = new Int64('fedcba9876543210');
-    console.log(x.toString());                  // 'fedcba9876543210'
+As you can see from the examples so far, `toString()` produces the hex string
+corresponding to an `Int64`.
 
 ### Comparison
 
