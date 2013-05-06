@@ -16,7 +16,7 @@
   "main": "Int64",
   "scripts": {
     "install": "node-gyp configure && node-gyp build",
-    "test": "mocha"
+    "test": "npm install && mocha"
   },
   "readmeFilename": "README.md"
 }
