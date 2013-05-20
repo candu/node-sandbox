@@ -1,8 +1,0 @@
-extends index
-
-block append head
-  link(rel='stylesheet', href='/static/css/test/mocha.css')
-
-block content
-  #mocha
-  script(data-main='/lib/test/main', src='/lib/third-party/require.js')
