@@ -1,0 +1,14 @@
+{
+  "name": "node-sandbox-thrift",
+  "description": "Playing around with node.js thrift bindings.",
+  "version": "0.0.1",
+  "private": true,
+  "keywords": [
+    "thrift",
+    "ipc"
+  ],
+  "dependencies": {
+    "fibrous": "0.3.x",
+    "thrift": "0.7.x"
+  }
+}
